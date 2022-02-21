@@ -87,9 +87,9 @@ def plot_image_and_profiles_3c(
     for key, item in roi.items():
         slice_set.add(item["position"]["slice"])
     slice_set = sorted(slice_set)
-    print(number_of_channels)
-    print(disp_channels)
-    print(slice_set)
+    # print(number_of_channels)
+    # print(disp_channels)
+    # print(slice_set)
     fig, axs = plt.subplots(
         #TODO:Fix this 
         len(slice_set),
