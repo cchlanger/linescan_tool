@@ -1,6 +1,6 @@
 """Contains all of the visualization tools for the line_scan application"""
 
-from read_roi import read_roi_zip
+from read_roi import read_roi_zip, read_roi_file
 import matplotlib.pyplot as plt
 from skimage import io, measure
 
@@ -39,7 +39,12 @@ def plot_image_and_profiles_2c(image_path, roi_path, disp_channels=None):
     if len(disp_channels) > 3:
         raise ValueError("You are trying to display more channels then your image has!")
     number_of_channels = 2
-    roi = read_roi_zip(roi_path)
+    if (roi_path.find(".zip") == -1):
+        roi = read_roi_file(roi_path)
+    else:
+        roi = read_roi_zip(roi_path)
+
+    # print(roi)
     # get slice set
     slice_set = set()
     for _, item in roi.items():
@@ -47,12 +52,15 @@ def plot_image_and_profiles_2c(image_path, roi_path, disp_channels=None):
     slice_set = sorted(slice_set)
 
     _, axs = plt.subplots(
-        len(slice_set),
+        # len(slice_set),
+        2,
         number_of_channels + len(disp_channels),
-        figsize=(15, 5 * len(slice_set)),
+        # figsize=(15, 5 * len(slice_set)),
+        figsize=(15, 5 * len(2)),
     )
     image = io.imread(image_path)
     for slice_num, img_slice in enumerate(slice_set):
+        # print(slice_num)
         # Plot linescans of all channels
         for channel in range(number_of_channels):
             for _, item in roi.items():
@@ -219,8 +227,12 @@ def plot_line_profiles_2c(
                     f"Your channel number: {number_of_channels} is not supported."
                 )
             x_values = [item["x1"], item["x2"]]
+            # print(x_values)
             y_values = [item["y1"], item["y2"]]
             axs[item_num, 1 + disp_num].plot(x_values, y_values, color=new_color)
+            # formatter = lambda x, pos: x * 0.03525845591290619  # 0.5 is the resolution
+            # axs[item_num, 1 + disp_num].xaxis.set_major_formatter(formatter)
+            # axs[item_num, 1 + disp_num].yaxis.set_major_formatter(formatter)
         # Draw images with lines for the set of channels to display
         cmap = plt.get_cmap("tab10")
         colors = iter(cmap.colors)
@@ -242,6 +254,9 @@ def plot_line_profiles_2c(
             x_values = [item["x1"], item["x2"]]
             y_values = [item["y1"], item["y2"]]
             axs[item_num, 1 + disp_num].plot(x_values, y_values, color=new_color)
+            # formatter = lambda x, pos: round(x * 0.03525845591290619,1)  # 0.5 is the resolution
+            # axs[item_num, 1 + disp_num].xaxis.set_major_formatter(formatter)
+            # axs[item_num, 1 + disp_num].yaxis.set_major_formatter(formatter)
 
 
 # def image_and_line(axs,item_num,disp_num,image,item):
