@@ -1,6 +1,6 @@
 """Contains all of the visualization tools for the line_scan application"""
 
-from read_roi import read_roi_zip, read_roi_file
+from read_roi import read_roi_zip
 import matplotlib.pyplot as plt
 from skimage import io, measure
 
@@ -43,8 +43,6 @@ def plot_image_and_profiles_2c(image_path, roi_path, disp_channels=None):
         roi = read_roi_file(roi_path)
     else:
         roi = read_roi_zip(roi_path)
-
-    # print(roi)
     # get slice set
     slice_set = set()
     for _, item in roi.items():
@@ -52,15 +50,12 @@ def plot_image_and_profiles_2c(image_path, roi_path, disp_channels=None):
     slice_set = sorted(slice_set)
 
     _, axs = plt.subplots(
-        # len(slice_set),
-        2,
+        len(slice_set),
         number_of_channels + len(disp_channels),
-        # figsize=(15, 5 * len(slice_set)),
-        figsize=(15, 5 * len(2)),
+        figsize=(15, 5 * len(slice_set)),
     )
     image = io.imread(image_path)
     for slice_num, img_slice in enumerate(slice_set):
-        # print(slice_num)
         # Plot linescans of all channels
         for channel in range(number_of_channels):
             for _, item in roi.items():
@@ -70,19 +65,33 @@ def plot_image_and_profiles_2c(image_path, roi_path, disp_channels=None):
                     values = measure.profile_line(
                         image[img_slice, channel, :, :], src, dst, 1, mode="constant"
                     )
-                    axs[slice_num, channel].plot(range(len(values)), values)
+                    if (len(slice_set)>1):
+                        axs[slice_num, channel].plot(range(len(values)), values)
+                    else:
+                        axs[channel].plot(range(len(values)), values)
         # Draw images with lines for the set of channels to display
         for disp_num, disp_channel in enumerate(disp_channels):
-            axs[slice_num, number_of_channels + disp_num].imshow(
-                image[img_slice, disp_channel, :, :], cmap="gray"
-            )
+            if (len(slice_set) > 1):
+                axs[slice_num, number_of_channels + disp_num].imshow(
+                    image[img_slice, disp_channel, :, :], cmap="gray"
+                )
+            else:
+                axs[number_of_channels + disp_num].imshow(
+                    image[img_slice, disp_channel, :, :], cmap="gray"
+                )
             for _, item in roi.items():
                 if item["position"]["slice"] == img_slice:
                     x_values = [item["x1"], item["x2"]]
                     y_values = [item["y1"], item["y2"]]
-                    axs[slice_num, number_of_channels + disp_num].plot(
-                        x_values, y_values
-                    )
+                    if (len(slice_set) > 1):
+                        axs[slice_num, number_of_channels + disp_num].plot(
+                            x_values, y_values
+                        )
+                    else:
+                        axs[number_of_channels + disp_num].plot(
+                            x_values, y_values
+                        )
+
 
 
 def plot_image_and_profiles_3c(
@@ -227,12 +236,8 @@ def plot_line_profiles_2c(
                     f"Your channel number: {number_of_channels} is not supported."
                 )
             x_values = [item["x1"], item["x2"]]
-            # print(x_values)
             y_values = [item["y1"], item["y2"]]
             axs[item_num, 1 + disp_num].plot(x_values, y_values, color=new_color)
-            # formatter = lambda x, pos: x * 0.03525845591290619  # 0.5 is the resolution
-            # axs[item_num, 1 + disp_num].xaxis.set_major_formatter(formatter)
-            # axs[item_num, 1 + disp_num].yaxis.set_major_formatter(formatter)
         # Draw images with lines for the set of channels to display
         cmap = plt.get_cmap("tab10")
         colors = iter(cmap.colors)
@@ -254,9 +259,6 @@ def plot_line_profiles_2c(
             x_values = [item["x1"], item["x2"]]
             y_values = [item["y1"], item["y2"]]
             axs[item_num, 1 + disp_num].plot(x_values, y_values, color=new_color)
-            # formatter = lambda x, pos: round(x * 0.03525845591290619,1)  # 0.5 is the resolution
-            # axs[item_num, 1 + disp_num].xaxis.set_major_formatter(formatter)
-            # axs[item_num, 1 + disp_num].yaxis.set_major_formatter(formatter)
 
 
 # def image_and_line(axs,item_num,disp_num,image,item):
