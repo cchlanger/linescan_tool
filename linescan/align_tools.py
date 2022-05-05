@@ -31,19 +31,19 @@ def linescan(
     pixelsize=1,
     align=True,
 ):
-    if (number_of_channels == 2) and (align_method == "half_max") :
+    if (number_of_channels == 2) and (align_method == "half_max"):
         result_df = linescan_half_alingne_lagacy_2c_dnafirst(
             image_path,
             roi_path,
             channels,
             number_of_channels=2,
-            #This is hacked so bad
+            # This is hacked so bad
             align_channel=align_channel,
             normalize=True,
             pixelsize=pixelsize,
             align=align,
         )
-        #print(result_df)
+        # print(result_df)
         return result_df
     elif (number_of_channels == 3) and (align_method == "half_max"):
         result_df = linescan_half_alingne_lagacy_3c(
@@ -56,8 +56,9 @@ def linescan(
             pixelsize=pixelsize,
             align=align,
         )
-        #print(result_df)
+        # print(result_df)
         return result_df
+
 
 def linescan_half_alingne_lagacy_3c(
     image_path,
@@ -98,7 +99,11 @@ def linescan_half_alingne_lagacy_3c(
                 src = (item["y1"], item["x1"])
                 dst = (item["y2"], item["x2"])
                 y_align = skimage.measure.profile_line(
-                    image[img_slice, :, :, align_channel], src, dst, 10, mode="constant"
+                    image[img_slice - 1, :, :, align_channel],
+                    src,
+                    dst,
+                    10,
+                    mode="constant",
                 )
 
                 p = np.poly1d(
@@ -122,7 +127,11 @@ def linescan_half_alingne_lagacy_3c(
 
                 ##HACK
                 dna = skimage.measure.profile_line(
-                    image[img_slice, :, :, align_channel], src, dst, 1, mode="constant"
+                    image[img_slice - 1, :, :, align_channel],
+                    src,
+                    dst,
+                    1,
+                    mode="constant",
                 )
                 p = np.poly1d(np.polyfit(np.arange(0, len(dna)) * pixelsize, dna, 10))
                 max_number = 10000
@@ -145,7 +154,11 @@ def linescan_half_alingne_lagacy_3c(
 
                 if channel != align_channel:
                     y3 = skimage.measure.profile_line(
-                        image[img_slice, :, :, channel], src, dst, 10, mode="constant"
+                        image[img_slice - 1, :, :, channel],
+                        src,
+                        dst,
+                        10,
+                        mode="constant",
                     )
                     p = np.poly1d(np.polyfit(np.arange(0, len(y3)) * pixelsize, y3, 10))
                     max_number = len(y3)
@@ -164,7 +177,7 @@ def linescan_half_alingne_lagacy_3c(
                         peak_point = peaks[biggest_peak2]
                     except:
                         peak_point = float("NaN")
-                    #biggest_peak2 = heights.index(max(heights))
+                    # biggest_peak2 = heights.index(max(heights))
                     peak_point = peaks[biggest_peak2]
                     # print(peak_point)
                     # plt.plot(peak_point-offset, 1, marker='o', markersize=3, color="red")
@@ -188,7 +201,7 @@ def linescan_half_alingne_lagacy_3c(
                 # offset = biggest_peak
                 # measure:
                 y = skimage.measure.profile_line(
-                    image[img_slice, :, :, channel], src, dst, 10, mode="constant"
+                    image[img_slice - 1, :, :, channel], src, dst, 10, mode="constant"
                 )
                 if normalize == True:
                     if align == True:
@@ -217,6 +230,7 @@ def linescan_half_alingne_lagacy_3c(
     fig, axs = plt.subplots(1)
     sns.boxplot(data=df)
     return df
+
 
 def linescan_half_alingne_lagacy_2c_dnafirst(
     image_path,
@@ -247,7 +261,7 @@ def linescan_half_alingne_lagacy_2c_dnafirst(
     fig, axs = plt.subplots(1, 1, figsize=(10, 5))
     image_peaks = [[], []]
     for single_image, single_roi in zip(image_path, roi_path):
-        if (single_roi.find(".zip") == -1):
+        if single_roi.find(".zip") == -1:
             roi = read_roi_file(single_roi)
         else:
             roi = read_roi_zip(single_roi)
@@ -270,7 +284,11 @@ def linescan_half_alingne_lagacy_2c_dnafirst(
                 src = (item["y1"], item["x1"])
                 dst = (item["y2"], item["x2"])
                 y_align = skimage.measure.profile_line(
-                    image[img_slice, align_channel, :, :], src, dst, 5, mode="constant"
+                    image[img_slice - 1, align_channel, :, :],
+                    src,
+                    dst,
+                    5,
+                    mode="constant",
                 )
 
                 p = np.poly1d(
@@ -294,7 +312,11 @@ def linescan_half_alingne_lagacy_2c_dnafirst(
 
                 ##HACK
                 dna = skimage.measure.profile_line(
-                    image[img_slice, align_channel, :, :], src, dst, 5, mode="constant"
+                    image[img_slice - 1, align_channel, :, :],
+                    src,
+                    dst,
+                    5,
+                    mode="constant",
                 )
                 p = np.poly1d(np.polyfit(np.arange(0, len(dna)) * pixelsize, dna, 10))
                 max_number = 10000
@@ -318,7 +340,11 @@ def linescan_half_alingne_lagacy_2c_dnafirst(
 
                 if channel != align_channel:
                     y3 = skimage.measure.profile_line(
-                        image[img_slice, channel, :, :], src, dst, 10, mode="constant"
+                        image[img_slice - 1, channel, :, :],
+                        src,
+                        dst,
+                        10,
+                        mode="constant",
                     )
                     p = np.poly1d(np.polyfit(np.arange(0, len(y3)) * pixelsize, y3, 10))
                     max_number = len(y3)
@@ -338,7 +364,7 @@ def linescan_half_alingne_lagacy_2c_dnafirst(
                     except:
                         peak_point = float("NaN")
                         print(single_roi)
-                    #peak_point = peaks[biggest_peak2]
+                    # peak_point = peaks[biggest_peak2]
                     channel_max.append((peak_point - offset) * scaling)
                     # print(peak_point)
                     # plt.plot(peak_point-offset, 1, marker='o', markersize=3, color="red")
@@ -362,7 +388,7 @@ def linescan_half_alingne_lagacy_2c_dnafirst(
                 # offset = biggest_peak
                 # measure:
                 y = skimage.measure.profile_line(
-                    image[img_slice, channel, :, :], src, dst, 10, mode="constant"
+                    image[img_slice - 1, channel, :, :], src, dst, 10, mode="constant"
                 )
                 if normalize == True:
                     if align == True:
@@ -398,6 +424,7 @@ def linescan_half_alingne_lagacy_2c_dnafirst(
     else:
         sns.boxplot(data=df)
     return df
+
 
 # def linescan_half_alingne_lagacy_2c_dnafirst(
 #     image_path,
